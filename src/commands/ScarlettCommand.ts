@@ -1,6 +1,5 @@
-import {IScarlettCommandWithTrigger} from "./interfaces/IScarlettCommandWithTrigger";
 import {TScarlettCommandContext} from "./TScarlettCommandContext";
-import {IScarlettCommandWithSubCommands} from "./interfaces/IScarlettCommandWithSubCommands";
+import {IScarlettCommandWithSubCommands, IScarlettCommandWithTrigger} from "./interfaces";
 
 export abstract class ScarlettCommand<TContext extends TScarlettCommandContext<never>>
 	implements IScarlettCommandWithTrigger<TContext>, IScarlettCommandWithSubCommands {

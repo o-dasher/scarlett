@@ -38,7 +38,7 @@ export const LimitedCalls = (args: TLimitedCallsArgs = {}) => {
 				},
 				configurable: true,
 				writable: true,
-			})
+			});
 			onCalledTooManyTimes({
 				targetName: Object.getPrototypeOf(target).name,
 				propertyName: name.toString(),
@@ -47,5 +47,5 @@ export const LimitedCalls = (args: TLimitedCallsArgs = {}) => {
 		}
 		
 		return caller;
-	}
-}
+	};
+};

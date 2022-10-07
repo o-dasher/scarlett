@@ -1,9 +1,13 @@
-import {Collection} from "discord.js";
+import {ScarlettCommand} from "../commands";
 
 export class CommandHandler {
-	public readonly commands = new Collection();
+	readonly commands: ScarlettCommand<never>[] = [];
 	
 	constructor() {
+	
+	}
+	
+	public async loadCommands() {
 	
 	}
 }

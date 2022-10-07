@@ -1,5 +1,5 @@
 import {Client, ClientOptions} from "discord.js";
-import {LimitedCalls} from "../decorators/LimitedCalls";
+import {LimitedCalls} from "../decorators";
 
 export class ScarlettClient extends Client {
 	constructor(options: ClientOptions) {

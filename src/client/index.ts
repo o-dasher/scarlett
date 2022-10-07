@@ -1,1 +1,1 @@
-export {ScarlettClient} from "./ScarlettClient"
+export * from "./ScarlettClient";
