@@ -1,9 +1,9 @@
 import {join} from "path";
 import {readdir} from "fs/promises";
 import {getRootInfo} from "./RootInfo";
+import {TWithOptionalPath} from "./Types";
 
-export type TParseDirectoryArgs = {
-	path?: string,
+export type TParseDirectoryArgs = TWithOptionalPath & {
 	onParse: (path: string) => Promise<void>
 }
 

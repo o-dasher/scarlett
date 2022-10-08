@@ -6,8 +6,17 @@ import {Dirent} from "fs";
 import {pathToFileURL} from "url";
 import {getRootInfo, RunTime} from "./RootInfo";
 import {ConstructorType} from "../types";
+import {TWithOptionalPath, TWithPath} from "./Types";
 
 type AnyTypedConstructor<T> = ConstructorType<[], T>;
+
+type TBaseClassLoaderLoadArgs<T> = {
+	onLoadedObject: (object: T) => void
+}
+
+type TClassLoaderLoadArgs<T> = TWithOptionalPath & TBaseClassLoaderLoadArgs<T>
+
+type TClassLoaderLoadArgsOnParse<T> = TWithPath & TBaseClassLoaderLoadArgs<T>
 
 export class ClassLoader<T> {
 	klass: AnyTypedConstructor<T>;
@@ -16,14 +25,20 @@ export class ClassLoader<T> {
 		this.klass = klass;
 	}
 	
-	async loadClassObjects(path: string) {
+	async loadClassObjects(args: TClassLoaderLoadArgs<T>) {
+		const {path} = args;
 		await parseDirectory({
 			path,
-			onParse: this.loadClassObjects
+			onParse: async (path) => {
+				await this.#loadClassObject({
+					path,
+					onLoadedObject: args.onLoadedObject
+				});
+			}
 		});
 	}
 	
-	async loadClassObject(path: string, onLoadedObject: (object: T) => void) {
+	async #loadClassObject({path, onLoadedObject}: TClassLoaderLoadArgsOnParse<T>) {
 		const files: Dirent[] = [];
 		
 		try {

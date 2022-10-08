@@ -5,3 +5,5 @@ export abstract class ScarlettCommand<TContext extends TScarlettCommandContext<n
 	implements IScarlettCommandWithTrigger<TContext>, IScarlettCommandWithSubCommands {
 	abstract trigger(context: TContext): Promise<void>
 }
+
+export type TAnyScarlettCommand = ScarlettCommand<never>;
