@@ -1,4 +1,10 @@
-import {Collection, Interaction} from "discord.js";
+import {
+	Collection,
+	Interaction, SlashCommandAttachmentOption, SlashCommandBooleanOption, SlashCommandChannelOption,
+	SlashCommandIntegerOption,
+	SlashCommandNumberOption, SlashCommandRoleOption,
+	SlashCommandStringOption, SlashCommandUserOption
+} from "discord.js";
 import {ModuleImporter} from "../io/importer";
 import {
 	BaseCommand,
@@ -28,6 +34,16 @@ export class CommandsHandler {
 				this.commands.set(command.name, command);
 			}
 		});
+	}
+	
+	#parseNestedCommand<C extends BaseCommand>({name, getAllNested}: ParseNestedArgs<C>) {
+		if (!name) return;
+		
+		const allNesting = getAllNested();
+		
+		if (!allNesting) return;
+		
+		return allNesting.get(name);
 	}
 	
 	async processCommand(interaction: Interaction) {
@@ -71,17 +87,47 @@ export class CommandsHandler {
 		
 		const executable = getCommandExecutable(executorCommand);
 		
-		if (executable)
-			await executable.execute({interaction, args: {}});
-	}
-	
-	#parseNestedCommand<C extends BaseCommand>({name, getAllNested}: ParseNestedArgs<C>) {
-		if (!name) return;
+		if (!executable) return;
 		
-		const allNesting = getAllNested();
+		const args: Record<string, any> = {};
 		
-		if (!allNesting) return;
+		for (const key in executable.options) {
+			let parser: (name: string) => unknown;
+			
+			const option = executable.options[key]!;
+			
+			switch (true) {
+				case option instanceof SlashCommandNumberOption:
+					parser = interaction.options.getNumber;
+					break;
+				case option instanceof SlashCommandIntegerOption:
+					parser = interaction.options.getInteger;
+					break;
+				case option instanceof SlashCommandStringOption:
+					parser = interaction.options.getString;
+					break;
+				case option instanceof SlashCommandBooleanOption:
+					parser = interaction.options.getBoolean;
+					break;
+				case option instanceof SlashCommandChannelOption:
+					parser = interaction.options.getChannel;
+					break;
+				case option instanceof SlashCommandUserOption:
+					parser = interaction.options.getUser;
+					break;
+				case option instanceof SlashCommandRoleOption:
+					parser = interaction.options.getRole;
+					break;
+				case option instanceof SlashCommandAttachmentOption:
+					parser = interaction.options.getAttachment;
+					break;
+				default:
+					continue;
+			}
+			
+			args[key] = parser(option.name);
+		}
 		
-		return allNesting.get(name);
+		await executable.execute({interaction, args});
 	}
 }
