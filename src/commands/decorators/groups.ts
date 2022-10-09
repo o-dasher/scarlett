@@ -1,10 +1,10 @@
 import {Command, SubCommandGroup} from "../impl";
-import {Constructor} from "../../types";
+import {EmptyConstructor} from "../../types";
 import {NestedCommandExtensionMetadataHandler} from "./common";
 
 const subcommandGroupsMetadataHandler = new NestedCommandExtensionMetadataHandler<Command, SubCommandGroup>();
 
 export const getSubcommandGroups = subcommandGroupsMetadataHandler.getMetadata;
 
-export const CommandWithSubcommandGroups = (subCommandGroups: Constructor<[], SubCommandGroup>[]) =>
+export const CommandWithSubcommandGroups = (subCommandGroups: EmptyConstructor<SubCommandGroup>[]) =>
 	(target: Command) => subcommandGroupsMetadataHandler.createNestedMetadata(target, subCommandGroups);

@@ -1,7 +1,6 @@
 import {BaseCommand} from "../interfaces";
 import {Collection} from "discord.js";
-import {SubCommandGroup} from "../impl";
-import {Constructor, EmptyConstructor} from "../../types";
+import {EmptyConstructor} from "../../types";
 
 export class CommandExtensionMetadataHandler<C extends BaseCommand, M> {
 	#metadataCollection = new Collection<C, M>();

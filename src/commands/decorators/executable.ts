@@ -1,10 +1,17 @@
 import {
 	Attachment,
 	Channel,
-	CommandInteraction, Role, SlashCommandAttachmentOption, SlashCommandBooleanOption, SlashCommandChannelOption,
+	CommandInteraction,
+	Role,
+	SlashCommandAttachmentOption,
+	SlashCommandBooleanOption,
+	SlashCommandChannelOption,
 	SlashCommandIntegerOption,
-	SlashCommandNumberOption, SlashCommandRoleOption,
-	SlashCommandStringOption, SlashCommandUserOption, User
+	SlashCommandNumberOption,
+	SlashCommandRoleOption,
+	SlashCommandStringOption,
+	SlashCommandUserOption,
+	User
 } from "discord.js";
 import {Command, SubCommand} from "../impl";
 import {CommandExtensionMetadataHandler} from "./common";

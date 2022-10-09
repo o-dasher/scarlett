@@ -2,7 +2,9 @@ import {Collection, Interaction} from "discord.js";
 import {ModuleImporter} from "../io/importer";
 import {
 	BaseCommand,
-	Command, getCommandExecutable,
+	Command,
+	getCommandExecutable,
+	getCommandPreconditions,
 	getParentCommandSubCommands,
 	PossibleExecutableCommand,
 	PossibleParentCommand
@@ -26,16 +28,6 @@ export class CommandsHandler {
 				this.commands.set(command.name, command);
 			}
 		});
-	}
-	
-	#parseNestedCommand<C extends BaseCommand>({name, getAllNested}: ParseNestedArgs<C>) {
-		if (!name) return;
-		
-		const allNesting = getAllNested();
-		
-		if (!allNesting) return;
-		
-		return allNesting.get(name);
 	}
 	
 	async processCommand(interaction: Interaction) {
@@ -66,11 +58,30 @@ export class CommandsHandler {
 			}
 		});
 		
-		console.log(commandChain.map(command => `${command.name} -> `));
+		const verifiedPreconditions = commandChain.every(chain => {
+			const preconditions = getCommandPreconditions(chain);
+			
+			if (!preconditions)
+				return true;
+			
+			return preconditions.every(precondition => precondition.verify(interaction));
+		});
+		
+		if (!verifiedPreconditions) return;
 		
 		const executable = getCommandExecutable(executorCommand);
 		
 		if (executable)
 			await executable.execute({interaction, args: {}});
+	}
+	
+	#parseNestedCommand<C extends BaseCommand>({name, getAllNested}: ParseNestedArgs<C>) {
+		if (!name) return;
+		
+		const allNesting = getAllNested();
+		
+		if (!allNesting) return;
+		
+		return allNesting.get(name);
 	}
 }
