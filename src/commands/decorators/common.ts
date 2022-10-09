@@ -2,7 +2,9 @@ import {BaseCommand} from "../interfaces";
 import {Collection} from "discord.js";
 import {EmptyConstructor} from "../../types";
 
-export class CommandExtensionMetadataHandler<C extends BaseCommand, M> {
+type EmptyConstructorBaseCommand = EmptyConstructor<BaseCommand>
+
+export class CommandExtensionMetadataHandler<C extends EmptyConstructorBaseCommand, M> {
 	#metadataCollection = new Collection<C, M>();
 	
 	public createMetadata(command: C, create: () => M) {
@@ -14,7 +16,7 @@ export class CommandExtensionMetadataHandler<C extends BaseCommand, M> {
 	}
 }
 
-export class NestedCommandExtensionMetadataHandler<C extends BaseCommand, N extends BaseCommand>
+export class NestedCommandExtensionMetadataHandler<C extends EmptyConstructorBaseCommand, N extends BaseCommand>
 	extends CommandExtensionMetadataHandler<C, Collection<string, N>> {
 	public createNestedMetadata(command: C, constructors: EmptyConstructor<N>[]) {
 		super.createMetadata(command, () => {

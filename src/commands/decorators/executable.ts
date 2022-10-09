@@ -15,14 +15,21 @@ import {
 } from "discord.js";
 import {Command, SubCommand} from "../impl";
 import {CommandExtensionMetadataHandler} from "./common";
+import {EmptyConstructor} from "../../types";
 
-type ExecutableCommandParam = never;
+type ExecutableCommandParam = unknown;
 type ExecutableCommandParams = Record<string, ExecutableCommandParam>;
 
-export type ExecutableCommandContext<A extends ExecutableCommandParams> = {
-	interaction: CommandInteraction,
+export type WithArgs<A> = {
 	args: A
 }
+
+type BaseExecutableCommandContext = {
+	interaction: CommandInteraction;
+}
+
+export type ExecutableCommandContext<A extends ExecutableCommandParams> = WithArgs<A> & BaseExecutableCommandContext;
+export type ExecutableCommandContextNoArgs = BaseExecutableCommandContext;
 
 export type OptionFromArg<A extends ExecutableCommandParam> =
 	A extends number ? SlashCommandNumberOption | SlashCommandIntegerOption :
@@ -40,17 +47,30 @@ export type OptionsFromArgs<A extends ExecutableCommandParams> = {
 	[Prop in keyof A]: OptionFromArg<A[Prop]>;
 }
 
-export type ExecutableCommandArgs<A extends ExecutableCommandParams> = {
+export type BaseExecutableCommandArgs<C extends BaseExecutableCommandContext> = {
+	execute: (ctx: C) => Promise<void>
+}
+
+export type ExecutableCommandArgsNoOptions = BaseExecutableCommandArgs<ExecutableCommandContextNoArgs>;
+
+export type ExecutableCommandArgs<A extends ExecutableCommandParams> =
+	BaseExecutableCommandArgs<ExecutableCommandContext<A>> & {
 	options: OptionsFromArgs<A>,
 	execute: (ctx: ExecutableCommandContext<A>) => Promise<void>
 }
 
-export type AnyExecutableCommandArgs = ExecutableCommandArgs<any>;
+export type AnyExecutableCommandArgs = BaseExecutableCommandArgs<any>;
 
-const executableCommandsMetadataHandler = new CommandExtensionMetadataHandler<PossibleExecutableCommand, AnyExecutableCommandArgs>();
+const executableCommandsMetadataHandler = new CommandExtensionMetadataHandler<EmptyConstructor<PossibleExecutableCommand>, AnyExecutableCommandArgs>();
 
 export const getCommandExecutable = executableCommandsMetadataHandler.getMetadata;
 
+const BaseExecutableCommandDecorator = <A extends AnyExecutableCommandArgs>(args: A) => {
+	return (target: EmptyConstructor<PossibleExecutableCommand>) => executableCommandsMetadataHandler.createMetadata(target, () => args);
+};
+
+export const ExecutableCommandNoOptions = BaseExecutableCommandDecorator<ExecutableCommandArgsNoOptions>;
+
 export function ExecutableCommand<A extends ExecutableCommandParams>(args: ExecutableCommandArgs<A>) {
-	return (target: PossibleExecutableCommand) => executableCommandsMetadataHandler.createMetadata(target, () => args);
+	return BaseExecutableCommandDecorator(args);
 }
