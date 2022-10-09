@@ -11,7 +11,7 @@ import {
 	Command,
 	getCommandExecutable,
 	getCommandPreconditions,
-	getParentCommandSubCommands,
+	getParentCommandSubCommands, isExecutableWithOptions,
 	PossibleExecutableCommand,
 	PossibleParentCommand
 } from "../commands";
@@ -91,43 +91,48 @@ export class CommandsHandler {
 		
 		const args: Record<string, any> = {};
 		
-		for (const key in executable.options) {
-			let parser: (name: string) => unknown;
-			
-			const option = executable.options[key]!;
-			
-			switch (true) {
-				case option instanceof SlashCommandNumberOption:
-					parser = interaction.options.getNumber;
-					break;
-				case option instanceof SlashCommandIntegerOption:
-					parser = interaction.options.getInteger;
-					break;
-				case option instanceof SlashCommandStringOption:
-					parser = interaction.options.getString;
-					break;
-				case option instanceof SlashCommandBooleanOption:
-					parser = interaction.options.getBoolean;
-					break;
-				case option instanceof SlashCommandChannelOption:
-					parser = interaction.options.getChannel;
-					break;
-				case option instanceof SlashCommandUserOption:
-					parser = interaction.options.getUser;
-					break;
-				case option instanceof SlashCommandRoleOption:
-					parser = interaction.options.getRole;
-					break;
-				case option instanceof SlashCommandAttachmentOption:
-					parser = interaction.options.getAttachment;
-					break;
-				default:
-					continue;
+		if (!isExecutableWithOptions(executable)) {
+			await executable.execute({interaction})
+		} else {
+			for (const key in executable.options) {
+				let parser: (name: string) => unknown;
+				
+				const option = executable.options[key]!;
+				
+				switch (true) {
+					case option instanceof SlashCommandNumberOption:
+						parser = interaction.options.getNumber;
+						break;
+					case option instanceof SlashCommandIntegerOption:
+						parser = interaction.options.getInteger;
+						break;
+					case option instanceof SlashCommandStringOption:
+						parser = interaction.options.getString;
+						break;
+					case option instanceof SlashCommandBooleanOption:
+						parser = interaction.options.getBoolean;
+						break;
+					case option instanceof SlashCommandChannelOption:
+						parser = interaction.options.getChannel;
+						break;
+					case option instanceof SlashCommandUserOption:
+						parser = interaction.options.getUser;
+						break;
+					case option instanceof SlashCommandRoleOption:
+						parser = interaction.options.getRole;
+						break;
+					case option instanceof SlashCommandAttachmentOption:
+						parser = interaction.options.getAttachment;
+						break;
+					default:
+						continue;
+				}
+				
+				args[key] = parser(option.name);
 			}
 			
-			args[key] = parser(option.name);
+			await executable.execute({interaction, args});
 		}
-		
-		await executable.execute({interaction, args});
 	}
+	
 }

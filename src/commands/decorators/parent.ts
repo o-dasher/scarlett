@@ -4,7 +4,7 @@ import {NestedCommandExtensionMetadataHandler} from "./common";
 
 export type PossibleParentCommand = Command | SubCommandGroup;
 
-const parentCommandsMetadataHandler = new NestedCommandExtensionMetadataHandler<EmptyConstructor<PossibleParentCommand>, SubCommand>();
+const parentCommandsMetadataHandler = new NestedCommandExtensionMetadataHandler<SubCommand>();
 
 export const getParentCommandSubCommands = parentCommandsMetadataHandler.getMetadata;
 

@@ -15,8 +15,7 @@ const callablesCallCountMap = new Map<string, number>();
 
 export const LimitedCalls = (args: LimitedCallsArgs = {}) => {
 	args.maxCalls ??= 1;
-	args.onCalledTooManyTimes ??= () => {
-	};
+	args.onCalledTooManyTimes ??= () => {};
 	
 	const {maxCalls, onCalledTooManyTimes} = args;
 	

@@ -61,7 +61,13 @@ export type ExecutableCommandArgs<A extends ExecutableCommandParams> =
 
 export type AnyExecutableCommandArgs = BaseExecutableCommandArgs<any>;
 
-const executableCommandsMetadataHandler = new CommandExtensionMetadataHandler<EmptyConstructor<PossibleExecutableCommand>, AnyExecutableCommandArgs>();
+export type AnyExecutableCommandArgsWithOptions = ExecutableCommandArgs<any>
+
+export function isExecutableWithOptions(executable: AnyExecutableCommandArgs): executable is AnyExecutableCommandArgsWithOptions {
+	return typeof (executable as AnyExecutableCommandArgsWithOptions).options === "object";
+}
+
+const executableCommandsMetadataHandler = new CommandExtensionMetadataHandler<AnyExecutableCommandArgs>();
 
 export const getCommandExecutable = executableCommandsMetadataHandler.getMetadata;
 

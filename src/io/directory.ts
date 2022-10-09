@@ -13,15 +13,13 @@ export const parseDirectory = async (args: ParseDirectoryArgs) => {
 	const {path, onParse} = args;
 	
 	const files = await readdir(path);
+	const dirPaths = files.map(file => join(path, file));
 	
-	for (const file of files) {
-		const dirPath = join(path, file);
-		
+	await Promise.all(dirPaths.map(async (path) => {
 		await onParse(path);
-		
 		await parseDirectory({
 			...args,
-			path: dirPath
+			path
 		});
-	}
+	}));
 };

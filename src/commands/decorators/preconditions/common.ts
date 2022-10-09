@@ -1,17 +1,20 @@
 import {BaseCommand} from "../../interfaces";
-import {Collection, CommandInteraction} from "discord.js";
+import {CommandInteraction} from "discord.js";
 import {EmptyConstructor} from "../../../types";
+import {CommandExtensionMetadataHandler} from "../common";
 
-const commandPreconditions = new Collection<EmptyConstructor<BaseCommand>, Precondition[]>();
+const commandPreconditionsMetadataHandler = new CommandExtensionMetadataHandler<Precondition[]>();
 
-export const getCommandPreconditions = commandPreconditions.get;
+export const getCommandPreconditions = commandPreconditionsMetadataHandler.getMetadata;
 
 export abstract class Precondition {
 	abstract verify(interaction: CommandInteraction): boolean;
 }
 
-export const WithPreconditions = (preconditions: (typeof Precondition)[]) => {
+export const WithPreconditions = (preconditions: (typeof Precondition | Precondition)[]) => {
 	return (target: EmptyConstructor<BaseCommand>) => {
-		commandPreconditions.set(target, preconditions.map(precondition => new (precondition as EmptyConstructor<Precondition>)()));
+		commandPreconditionsMetadataHandler.createMetadata(target, () => preconditions.map(precondition =>
+			typeof precondition == "function" ? new (precondition as EmptyConstructor<Precondition>)() : precondition)
+		);
 	};
 };

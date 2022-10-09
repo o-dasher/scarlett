@@ -1,14 +1,15 @@
 import {
 	ExecutableCommandNoOptions,
 	GuildOnly,
-	SubCommand,
+	SubCommand, GuildPermissionsPrecondition,
 	WithPreconditions
 } from "../../../commands";
+import {PermissionsBitField} from "discord.js";
 
-@WithPreconditions([GuildOnly])
+@WithPreconditions([GuildOnly, new GuildPermissionsPrecondition([PermissionsBitField.Flags.Administrator])])
 @ExecutableCommandNoOptions({
 	execute: async (ctx) => {
-		await ctx.interaction.reply("Nyah!")
+		await ctx.interaction.reply("Nyah!");
 	}
 })
 export default class Nyah extends SubCommand {

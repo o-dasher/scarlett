@@ -46,18 +46,19 @@ export class ModuleImporter<T> {
 			return files;
 		}
 		
-		for (const file of files) {
+		const importPaths = files.map(file => {
 			const realPath = join(path, file.name);
 			
-			const importPath =
-				getRootInformation().type === RunTime.Module
-					? pathToFileURL(realPath).pathname
-					: relative(__dirname, realPath);
-			
-			const module = await import(importPath);
+			return getRootInformation().type === RunTime.Module
+				? pathToFileURL(realPath).pathname
+				: relative(__dirname, realPath);
+		});
+		
+		await Promise.all(importPaths.map(async (path) => {
+			const module = await import(path);
 			
 			if (!module.default) {
-				console.error(`Missing default export trying to import a ${this.importType.name} at ${realPath}`);
+				console.error(`Missing default export trying to import a ${this.importType.name} at ${path}`);
 				return;
 			}
 			
@@ -68,6 +69,6 @@ export class ModuleImporter<T> {
 				console.log(`Imported a ${type.name} as a instance of ${this.importType.name}.`);
 				onImport(object);
 			}
-		}
+		}));
 	}
 }
