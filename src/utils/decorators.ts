@@ -1,19 +1,19 @@
-export type TLimitedCallsArgsRequired = {
+export type RequiredLimitedCallArgs = {
 	maxCalls: number,
-	onCalledTooManyTimes: (args: TListenerArgs) => void
+	onCalledTooManyTimes: (args: ListenerArgs) => void
 }
 
-export type TListenerArgs = {
+export type ListenerArgs = {
 	targetName: string,
 	propertyName: string,
-	args: TLimitedCallsArgsRequired
+	args: RequiredLimitedCallArgs
 }
 
-export type TLimitedCallsArgs = Partial<TLimitedCallsArgsRequired>
+export type PartialLimitedCallArgs = Partial<RequiredLimitedCallArgs>
 
 const callablesCallCountMap = new Map<string, number>();
 
-export const LimitedCalls = (args: TLimitedCallsArgs = {}) => {
+export const LimitedCalls = (args: PartialLimitedCallArgs = {}) => {
 	args.maxCalls ??= 1;
 	args.onCalledTooManyTimes ??= () => {
 	};
@@ -42,7 +42,7 @@ export const LimitedCalls = (args: TLimitedCallsArgs = {}) => {
 			onCalledTooManyTimes({
 				targetName: Object.getPrototypeOf(target).name,
 				propertyName: name.toString(),
-				args: args as TLimitedCallsArgsRequired
+				args: args as RequiredLimitedCallArgs
 			});
 		}
 		

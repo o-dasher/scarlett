@@ -1,2 +1,11 @@
-export * from "./CommandDescriptor";
-export * from "./WithSubcommands";
+/**
+ * --------------------------------------------------------------------------------------------
+ * The requirement for an extension to be a decorator rather than an interface is
+ * that decorators can only be implemented on certain command types (e.g. subcommands support).
+ * whilst interfaces should affect commands, subcommands and groups.
+ * --------------------------------------------------------------------------------------------
+ */
+
+export * from "./parent";
+export * from "./trigger";
+export * from "./common";

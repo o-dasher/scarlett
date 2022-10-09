@@ -1,14 +1,14 @@
 import {join} from "path";
 import {readdir} from "fs/promises";
-import {getRootInfo} from "./RootInfo";
-import {TWithOptionalPath} from "./Types";
+import {getRootInformation} from "./root";
+import {WithOptionalPath} from "./types";
 
-export type TParseDirectoryArgs = TWithOptionalPath & {
+export type ParseDirectoryArgs = WithOptionalPath & {
 	onParse: (path: string) => Promise<void>
 }
 
-export const parseDirectory = async (args: TParseDirectoryArgs) => {
-	args.path ??= getRootInfo().root;
+export const parseDirectory = async (args: ParseDirectoryArgs) => {
+	args.path ??= getRootInformation().root;
 	
 	const {path, onParse} = args;
 	

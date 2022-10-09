@@ -6,14 +6,14 @@ export enum RunTime {
 	CommonJS
 }
 
-export type RootInfo = {
+export type Root = {
 	root: string,
 	type: RunTime
 }
 
-let rootInfo: RootInfo;
+let rootInfo: Root;
 
-export const getRootInfo = () => {
+export const getRootInformation = () => {
 	if (rootInfo) return rootInfo;
 	
 	const cwd = process.cwd();

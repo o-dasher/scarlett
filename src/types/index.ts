@@ -1,1 +1,1 @@
-export * from "./ConstructorType";
+export * from "./constructor";

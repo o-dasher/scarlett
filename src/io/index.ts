@@ -1,2 +1,3 @@
-export * from "./RootInfo";
+export * from "./root";
+export * from "./types";
 export * from "./ClassLoader";
