@@ -24,12 +24,14 @@ export type WithArgs<A> = {
 	args: A
 }
 
-type BaseExecutableCommandContext = {
+export type BaseExecutableCommandContext = {
 	interaction: CommandInteraction;
 }
 
 export type ExecutableCommandContext<A extends ExecutableCommandParams> = WithArgs<A> & BaseExecutableCommandContext;
 export type ExecutableCommandContextNoArgs = BaseExecutableCommandContext;
+
+export type AnyExecutableCommandContext = ExecutableCommandContextNoArgs | ExecutableCommandContext<any>
 
 export type OptionFromArg<A extends ExecutableCommandParam> =
 	A extends number ? SlashCommandNumberOption | SlashCommandIntegerOption :

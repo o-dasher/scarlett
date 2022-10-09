@@ -1,7 +1,8 @@
 import {
 	ExecutableCommandNoOptions,
 	GuildOnly,
-	SubCommand, GuildPermissionsPrecondition,
+	GuildPermissionsPrecondition,
+	SubCommand,
 	WithPreconditions
 } from "../../../commands";
 import {PermissionsBitField} from "discord.js";

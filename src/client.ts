@@ -1,23 +1,22 @@
-import {Client} from "discord.js";
-import {LimitedCalls} from "./decorators";
-import {CommandsHandler} from "./handlers";
+import type {ClientOptions} from "discord.js";
+import {Client, Events} from "discord.js";
+import {CommandDeployHandler, CommandsHandler} from "./handlers";
 
 export class ScarlettClient extends Client {
 	readonly commandsHandler = new CommandsHandler();
+	readonly commandsDeployer = new CommandDeployHandler({
+		commandsHandler: this.commandsHandler
+	});
 	
-	@LimitedCalls()
-	async onceLogin() {
-		await this.commandsHandler.loadCommands();
-		this.on("interactionCreate", async (interaction) => {
+	public constructor(options: ClientOptions) {
+		super(options);
+		
+		this.on(Events.InteractionCreate, async (interaction) => {
 			await this.commandsHandler.processCommand(interaction);
 		});
-	}
-	
-	override async login(token?: string) {
-		const response = await super.login(token);
 		
-		await this.onceLogin();
-		
-		return response;
+		this.once(Events.ClientReady, async () => {
+			await this.commandsHandler.loadCommands();
+		});
 	}
 }

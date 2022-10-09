@@ -1,5 +1,6 @@
 import {
-	Collection,
+	ClientApplication,
+	Collection, CommandInteraction, Guild,
 	Interaction,
 	SlashCommandAttachmentOption,
 	SlashCommandBooleanOption,
@@ -12,11 +13,12 @@ import {
 } from "discord.js";
 import {ModuleImporter} from "../io/importer";
 import {
-	BaseCommand,
+	AnyExecutableCommandArgs, AnyExecutableCommandContext,
+	BaseCommand, BaseExecutableCommandContext,
 	Command,
 	getCommandExecutable,
 	getCommandPreconditions,
-	getParentCommandSubCommands,
+	getParentCommandSubCommands, GuildOnly,
 	isExecutableWithOptions,
 	PossibleExecutableCommand,
 	PossibleParentCommand
@@ -40,6 +42,16 @@ export class CommandsHandler {
 				this.commands.set(command.name, command);
 			}
 		});
+	}
+	
+	#parseNestedCommand<C extends BaseCommand>({name, getAllNested}: ParseNestedArgs<C>) {
+		if (!name) return;
+		
+		const allNesting = getAllNested();
+		
+		if (!allNesting) return;
+		
+		return allNesting.get(name);
 	}
 	
 	async processCommand(interaction: Interaction) {
@@ -85,11 +97,9 @@ export class CommandsHandler {
 		
 		if (!executable) return;
 		
-		const args: Record<string, any> = {};
+		let context: AnyExecutableCommandContext = {interaction, args: {}};
 		
-		if (!isExecutableWithOptions(executable)) {
-			await executable.execute({interaction});
-		} else {
+		if (isExecutableWithOptions(executable)) {
 			for (const key in executable.options) {
 				let parser: (name: string) => unknown;
 				
@@ -124,21 +134,50 @@ export class CommandsHandler {
 						continue;
 				}
 				
-				args[key] = parser(option.name);
+				context.args[key] = parser(option.name);
 			}
-			
-			await executable.execute({interaction, args});
 		}
+		
+		await executable.execute(context);
+	}
+}
+
+type CommandDeployHandlerOptions = {
+	guild?: Guild
+	debug?: boolean
+	application?: ClientApplication
+	commandsHandler: CommandsHandler
+}
+
+export class CommandDeployHandler {
+	guild?: Guild;
+	debug?: boolean;
+	application?: ClientApplication;
+	commandsHandler: CommandsHandler;
+	
+	public constructor({guild, debug, application, commandsHandler}: CommandDeployHandlerOptions) {
+		this.guild = guild;
+		this.debug = debug;
+		this.application = application;
+		this.commandsHandler = commandsHandler;
 	}
 	
-	#parseNestedCommand<C extends BaseCommand>({name, getAllNested}: ParseNestedArgs<C>) {
-		if (!name) return;
+	async deploy(options: {
+		commandName: string,
+		interaction: CommandInteraction,
+	}) {
+		const {commandName, interaction} = options;
 		
-		const allNesting = getAllNested();
+		const command = this.commandsHandler.commands.get(commandName);
 		
-		if (!allNesting) return;
+		if (!command) return;
 		
-		return allNesting.get(name);
+		const path = this.debug ? this.guild?.commands ?? interaction.guild?.commands : this.application?.commands;
+		
+		if (!path) {
+			return;
+		}
+		
+		await path?.create(command.toJSON());
 	}
-	
 }
