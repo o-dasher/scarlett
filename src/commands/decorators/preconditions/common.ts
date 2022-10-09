@@ -10,20 +10,8 @@ export abstract class Precondition {
 	abstract verify(interaction: CommandInteraction): boolean;
 }
 
-const preconditionInstances = new Collection<typeof Precondition, Precondition>();
-
 export const WithPreconditions = (preconditions: (typeof Precondition)[]) => {
 	return (target: EmptyConstructor<BaseCommand>) => {
-		commandPreconditions.set(target, preconditions.map(precondition => {
-			const instance = preconditionInstances.get(precondition);
-			
-			if (instance) return instance;
-			
-			const newInstance = new (precondition as any)();
-			
-			preconditionInstances.set(precondition, newInstance);
-			
-			return newInstance;
-		}));
+		commandPreconditions.set(target, preconditions.map(precondition => new (precondition as EmptyConstructor<Precondition>)()));
 	};
 };
