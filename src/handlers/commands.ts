@@ -2,9 +2,9 @@ import {Collection, Interaction} from "discord.js";
 import {ModuleImporter} from "../io/importer";
 import {
 	BaseCommand,
-	Command, getCommandsTrigger,
+	Command, getCommandExecutable,
 	getParentCommandSubCommands,
-	PossibleCommandWithTrigger,
+	PossibleExecutableCommand,
 	PossibleParentCommand
 } from "../commands";
 import {getSubcommandGroups} from "../commands/decorators/groups";
@@ -15,7 +15,7 @@ type ParseNestedArgs<C extends BaseCommand> = {
 	onSuccess: (selectedCommand: C) => void
 }
 
-export class Commands {
+export class CommandsHandler {
 	readonly commands = new Collection<string, Command>();
 	
 	async loadCommands() {
@@ -48,7 +48,7 @@ export class Commands {
 		const commandChain: BaseCommand[] = [command];
 		
 		let parentCommand: PossibleParentCommand = command;
-		let executorCommand: PossibleCommandWithTrigger = command;
+		let executorCommand: PossibleExecutableCommand = command;
 		
 		this.#parseNestedCommand({
 			name: interaction.options.getSubcommandGroup(),
@@ -68,9 +68,9 @@ export class Commands {
 		
 		console.log(commandChain.map(command => `${command.name} -> `));
 		
-		const trigger = getCommandsTrigger(executorCommand);
+		const executable = getCommandExecutable(executorCommand);
 		
-		if (trigger)
-			await trigger.trigger({interaction, args: {}});
+		if (executable)
+			await executable.execute({interaction, args: {}});
 	}
 }

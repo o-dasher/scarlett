@@ -7,5 +7,5 @@
  */
 
 export * from "./parent";
-export * from "./trigger";
+export * from "./executable";
 export * from "./common";
