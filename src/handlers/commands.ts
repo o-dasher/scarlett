@@ -1,9 +1,14 @@
 import {
 	Collection,
-	Interaction, SlashCommandAttachmentOption, SlashCommandBooleanOption, SlashCommandChannelOption,
+	Interaction,
+	SlashCommandAttachmentOption,
+	SlashCommandBooleanOption,
+	SlashCommandChannelOption,
 	SlashCommandIntegerOption,
-	SlashCommandNumberOption, SlashCommandRoleOption,
-	SlashCommandStringOption, SlashCommandUserOption
+	SlashCommandNumberOption,
+	SlashCommandRoleOption,
+	SlashCommandStringOption,
+	SlashCommandUserOption
 } from "discord.js";
 import {ModuleImporter} from "../io/importer";
 import {
@@ -11,7 +16,8 @@ import {
 	Command,
 	getCommandExecutable,
 	getCommandPreconditions,
-	getParentCommandSubCommands, isExecutableWithOptions,
+	getParentCommandSubCommands,
+	isExecutableWithOptions,
 	PossibleExecutableCommand,
 	PossibleParentCommand
 } from "../commands";
@@ -34,16 +40,6 @@ export class CommandsHandler {
 				this.commands.set(command.name, command);
 			}
 		});
-	}
-	
-	#parseNestedCommand<C extends BaseCommand>({name, getAllNested}: ParseNestedArgs<C>) {
-		if (!name) return;
-		
-		const allNesting = getAllNested();
-		
-		if (!allNesting) return;
-		
-		return allNesting.get(name);
 	}
 	
 	async processCommand(interaction: Interaction) {
@@ -92,7 +88,7 @@ export class CommandsHandler {
 		const args: Record<string, any> = {};
 		
 		if (!isExecutableWithOptions(executable)) {
-			await executable.execute({interaction})
+			await executable.execute({interaction});
 		} else {
 			for (const key in executable.options) {
 				let parser: (name: string) => unknown;
@@ -133,6 +129,16 @@ export class CommandsHandler {
 			
 			await executable.execute({interaction, args});
 		}
+	}
+	
+	#parseNestedCommand<C extends BaseCommand>({name, getAllNested}: ParseNestedArgs<C>) {
+		if (!name) return;
+		
+		const allNesting = getAllNested();
+		
+		if (!allNesting) return;
+		
+		return allNesting.get(name);
 	}
 	
 }

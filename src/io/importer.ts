@@ -5,7 +5,7 @@ import {Dirent} from "fs";
 import {pathToFileURL} from "url";
 import {getRootInformation, RunTime} from "./root";
 import {WithOptionalPath, WithPath} from "./types";
-import {Constructor, EmptyConstructor} from "../types";
+import {EmptyConstructor} from "../types";
 import {FileExtensions} from "./enum";
 
 type ImporterArgs<T> = {
