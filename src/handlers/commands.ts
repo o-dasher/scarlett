@@ -13,12 +13,12 @@ import {
 } from "discord.js";
 import {ModuleImporter} from "../io/importer";
 import {
-	AnyExecutableCommandArgs, AnyExecutableCommandContext,
-	BaseCommand, BaseExecutableCommandContext,
+	AnyExecutableCommandContext,
+	BaseCommand,
 	Command,
 	getCommandExecutable,
 	getCommandPreconditions,
-	getParentCommandSubCommands, GuildOnly,
+	getParentCommandSubCommands,
 	isExecutableWithOptions,
 	PossibleExecutableCommand,
 	PossibleParentCommand

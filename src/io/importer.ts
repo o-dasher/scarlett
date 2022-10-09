@@ -8,13 +8,6 @@ import {WithOptionalPath, WithPath} from "./types";
 import {EmptyConstructor} from "../types";
 import {FileExtensions} from "./enum";
 
-type ImporterArgs<T> = {
-	onImport: (object: T) => void
-}
-
-type ImporterImportArgs<T> = WithOptionalPath & ImporterArgs<T>
-
-type ImporterParsedArgs<T> = WithPath & ImporterArgs<T>
 
 export class ModuleImporter<T> {
 	importType: EmptyConstructor<T>;
@@ -23,27 +16,28 @@ export class ModuleImporter<T> {
 		this.importType = importType;
 	}
 	
-	async importAll(args: ImporterImportArgs<T>) {
+	async importAll(args: WithOptionalPath) {
 		const {path} = args;
-		await parseDirectory({
+		
+		const parsedPaths = await parseDirectory({
 			path,
-			onParse: async (path) => {
-				await this.importSingle({
-					path,
-					onImport: args.onImport
-				});
-			}
 		});
+		
+		await Promise.all(parsedPaths.map(async (path) => {
+			await this.importSingle({
+				path
+			});
+		}));
 	}
 	
-	async importSingle({path, onImport}: ImporterParsedArgs<T>) {
+	async importSingle({path}: WithPath): Promise<T[]> {
 		const files: Dirent[] = [];
 		
 		try {
 			files.push(...(await readdir(path, {withFileTypes: true}))
 				.filter(file => file.isFile() && file.name.endsWith(FileExtensions.JS)));
 		} catch {
-			return files;
+			return [];
 		}
 		
 		const importPaths = files.map(file => {
@@ -54,21 +48,12 @@ export class ModuleImporter<T> {
 				: relative(__dirname, realPath);
 		});
 		
-		await Promise.all(importPaths.map(async (path) => {
-			const module = await import(path);
-			
-			if (!module.default) {
-				console.error(`Missing default export trying to import a ${this.importType.name} at ${path}`);
-				return;
-			}
-			
-			const type = module.default;
-			const object = new type(...[]);
-			
-			if (object instanceof this.importType) {
-				console.log(`Imported a ${type.name} as a instance of ${this.importType.name}.`);
-				onImport(object);
-			}
-		}));
+		const importModules = await Promise.all(importPaths.map(async (path) => await import(path)));
+		
+		return importModules
+			.map(module => module.default)
+			.filter(exported => exported)
+			.map(exported => new exported())
+			.filter(instance => instance instanceof this.importType);
 	}
 }
