@@ -1,13 +1,10 @@
-import {parseDirectory} from "./directory";
+import {Directory, parseDirectoryRecursive} from "./directory";
 import {join, relative} from "path";
-import {readdir} from "fs/promises";
-import {Dirent} from "fs";
 import {pathToFileURL} from "url";
 import {getRootInformation, RunTime} from "./root";
-import {WithOptionalPath, WithPath} from "./types";
-import {EmptyConstructor} from "../types";
+import {WithOptionalPath} from "./types";
+import {EmptyConstructor, isConstructor} from "../types";
 import {FileExtensions} from "./enum";
-
 
 export class ModuleImporter<T> {
 	importType: EmptyConstructor<T>;
@@ -16,44 +13,32 @@ export class ModuleImporter<T> {
 		this.importType = importType;
 	}
 	
-	async importAll(args: WithOptionalPath) {
-		const {path} = args;
+	async importAll(args: WithOptionalPath = {}) {
+		const directories = await parseDirectoryRecursive(args);
 		
-		const parsedPaths = await parseDirectory({
-			path,
-		});
+		const imported = (await Promise.all(directories.map(async (dir) => await this.importSingleDirectory(dir)))).flat();
 		
-		await Promise.all(parsedPaths.map(async (path) => {
-			await this.importSingle({
-				path
-			});
-		}));
+		return imported;
 	}
 	
-	async importSingle({path}: WithPath): Promise<T[]> {
-		const files: Dirent[] = [];
+	async importSingleDirectory(directory: Directory): Promise<T[]> {
+		const realPaths = directory.files.map(file => join(directory.path, file.name));
 		
-		try {
-			files.push(...(await readdir(path, {withFileTypes: true}))
-				.filter(file => file.isFile() && file.name.endsWith(FileExtensions.JS)));
-		} catch {
-			return [];
-		}
+		const importPaths = realPaths
+			.map(path => getRootInformation().type === RunTime.Module
+				? pathToFileURL(path).pathname
+				: relative(__dirname, path)
+			).filter(path => path.endsWith(FileExtensions.JS));
 		
-		const importPaths = files.map(file => {
-			const realPath = join(path, file.name);
-			
-			return getRootInformation().type === RunTime.Module
-				? pathToFileURL(realPath).pathname
-				: relative(__dirname, realPath);
-		});
+		const importModules = await Promise.all(importPaths.map(async (path) => {
+			try {
+				return await import(path);
+			} catch (e) {}
+		}));
 		
-		const importModules = await Promise.all(importPaths.map(async (path) => await import(path)));
+		const importDefaults = importModules.filter(module => module).map(module => module.default);
+		const importedInstances = importDefaults.filter(isConstructor).map(imported => new imported());
 		
-		return importModules
-			.map(module => module.default)
-			.filter(exported => exported)
-			.map(exported => new exported())
-			.filter(instance => instance instanceof this.importType);
+		return importedInstances.filter(instance => instance instanceof this.importType);
 	}
 }

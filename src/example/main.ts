@@ -1,7 +1,12 @@
-import {ScarlettClient} from "../client";
+import {ScarlettClient, ScarlettClientEvents} from "../client";
+import {TOKEN} from "./config.json";
 
-const MyBot = new ScarlettClient({
+const bot = new ScarlettClient({
 	intents: []
 });
 
-void MyBot.login("MTAyODcwMjc0ODM2OTIyMzcwMA.GLlsyr.jTOUs8H-fSZAKHEieGhkPbZlIDoWjacWDHMlDU");
+bot.once(ScarlettClientEvents.SetupFinished, () => {
+	bot.commandsHandler.commands.map(command => command.name).forEach(console.log);
+});
+
+void bot.login(TOKEN);

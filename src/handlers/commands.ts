@@ -33,15 +33,11 @@ type ParseNestedArgs<C extends BaseCommand> = {
 
 export class CommandsHandler {
 	readonly commands = new Collection<string, Command>();
+	readonly importer = new ModuleImporter(Command);
 	
 	async loadCommands() {
-		const importer = new ModuleImporter(Command);
-		
-		await importer.importAll({
-			onImport: command => {
-				this.commands.set(command.name, command);
-			}
-		});
+		const commands = await this.importer.importAll();
+		commands.forEach(command => this.commands.set(command.name, command));
 	}
 	
 	#parseNestedCommand<C extends BaseCommand>({name, getAllNested}: ParseNestedArgs<C>) {

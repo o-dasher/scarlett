@@ -14,5 +14,6 @@ import {PermissionsBitField} from "discord.js";
 	}
 })
 export default class Nyah extends SubCommand {
-
+	override name = "nyah";
+	override description = "owo";
 }

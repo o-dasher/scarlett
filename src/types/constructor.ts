@@ -4,3 +4,15 @@ export type Constructor<A extends unknown[], T> = {
 };
 
 export type EmptyConstructor<T> = Constructor<[], T>;
+
+const handler = {
+	"construct": () => handler
+};
+
+export const isConstructor = (object: any) => {
+	try {
+		return !!(new (new Proxy(object, handler)));
+	} catch {
+		return false;
+	}
+};

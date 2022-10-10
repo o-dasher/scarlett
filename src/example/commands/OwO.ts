@@ -19,5 +19,6 @@ type Params = {
 	}
 })
 export default class OwO extends Command {
-
+	override name = "owo";
+	override description = "nyah";
 }
